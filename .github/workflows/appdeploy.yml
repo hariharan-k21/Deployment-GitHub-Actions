@@ -37,4 +37,9 @@ jobs:
 
     - name: Deploy to EC2 (Optional)
       run: |
+        # Create the SSH key file from the secret stored in GitHub Secrets
+        echo "${{ secrets.EC2_SSH_KEY }}" > my-ec2-key.pem
+        chmod 600 my-ec2-key.pem  # Make sure the key is readable only by the script
+
+        # Get the EC2 instance's public IP and SSH into it to restart Nginx
         ssh -o StrictHostKeyChecking=no -i my-ec2-key.pem ubuntu@$(aws ec2 describe-instances --instance-ids ${{ secrets.AWS_EC2_INSTANCE_ID }} --query 'Reservations[0].Instances[0].PublicIpAddress' --output text) "sudo systemctl restart nginx"
